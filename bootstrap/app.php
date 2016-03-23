@@ -27,6 +27,20 @@ $app->withFacades();
 
 // $app->withEloquent();
 
+// Setup configuration parameters
+
+config([
+    "filesystems" => [
+        'default' => 'local',
+        'disks' => [
+            'local' => [
+                'driver' => 'local',
+                'root' => storage_path('app'),
+            ],
+        ],
+    ],
+]);
+
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -78,6 +92,7 @@ $app->singleton(
 |
 */
 
+$app->register(Illuminate\Filesystem\FilesystemServiceProvider::class);
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
