@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\MarfilClient;
 use Illuminate\Console\Command;
 
-class MarfilClientCommand extends Command
+class MarfilClientCrackCommand extends Command
 {
     private $client;
 
@@ -45,10 +45,6 @@ class MarfilClientCommand extends Command
         $server = $this->argument('server');
         $file = $this->argument('file');
         $bssid = $this->argument('bssid');
-
-        $this->line($server);
-        $this->line($file);
-        $this->line($bssid);
 
         $this->line('Sending crack request...');
 
