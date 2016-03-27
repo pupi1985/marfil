@@ -7,6 +7,11 @@ use Illuminate\Console\Command;
 
 class MarfilClientCrackCommand extends Command
 {
+    /**
+     * Client which the command will interact with.
+     *
+     * @var MarfilClient
+     */
     private $client;
 
     /**
@@ -33,6 +38,7 @@ class MarfilClientCrackCommand extends Command
         parent::__construct();
 
         $this->client = $client;
+        $client->setCommand($this);
     }
 
     /**
@@ -42,22 +48,16 @@ class MarfilClientCrackCommand extends Command
      */
     public function handle()
     {
-        $server = $this->argument('server');
-        $file = $this->argument('file');
-        $bssid = $this->argument('bssid');
-
-        $this->line('Sending crack request...');
-
         try {
-            $response = $this->client->crack($server, $file, $bssid);
-            $responseObject = json_decode($response);
-            if ($responseObject->result == 'success') {
-                $this->info($responseObject->message);
-            } else {
-                $this->error($responseObject->message);
-            }
+            $server = $this->argument('server');
+            $file = $this->argument('file');
+            $bssid = $this->argument('bssid');
+
+            $this->line('Sending crack request...');
+
+            $this->client->crack($server, $file, $bssid);
         } catch (Exception $e) {
-            $this->error('There has been an error while executing the request.');
+            $this->error($e->getMessage());
         }
 
     }

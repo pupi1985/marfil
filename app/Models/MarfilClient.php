@@ -25,7 +25,7 @@ class MarfilClient
      */
     public function setCommand($command)
     {
-        $this->comand = $command;
+        $this->command = $command;
     }
 
     /**
@@ -34,8 +34,6 @@ class MarfilClient
      * @param string $server Server to send the request to (only hostname and port)
      * @param string $file Path for the .cap file to attach to the request
      * @param string $bssid Bssid of the network to crack as a formatted string
-     *
-     * @return \Illuminate\Http\JsonResponse
      *
      * @throws Exception
      */
@@ -54,7 +52,13 @@ class MarfilClient
             ['file' => $uploadedFile]
         );
 
-        return app()->dispatch($request)->getContent();
+        $responseContent = app()->dispatch($request)->getContent();
+
+        $responseObject = json_decode($responseContent);
+        if ($responseObject->result == 'error') {
+            throw new Exception($responseObject->message);
+        }
+        $this->command->info($responseObject->message);
     }
 
     /**
