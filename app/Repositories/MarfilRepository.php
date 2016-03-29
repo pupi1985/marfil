@@ -30,14 +30,16 @@ class MarfilRepository
      * Save a new dictionary into the database.
      *
      * @param $name Name of the dictionary
+     * @param $hash SHA1 hash of the dictionary
      * @param $parts Amount of parts of the dictionary
      *
      * @return void
      */
-    public function saveDictionary($name, $parts)
+    public function saveDictionary($name, $hash, $parts)
     {
         DB::table('dictionaries')->insert([
             'name' => $name,
+            'hash' => $hash,
             'parts' => $parts,
         ]);
     }

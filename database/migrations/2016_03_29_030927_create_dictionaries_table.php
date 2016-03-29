@@ -15,7 +15,10 @@ class CreateDictionariesTable extends Migration
         Schema::create('dictionaries', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('hash', 40);
             $table->integer('parts');
+
+            $table->unique('hash');
         });
     }
 

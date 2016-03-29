@@ -113,12 +113,13 @@ class MarfilCommon
      * Return the dictionary parts path for a given dictionary.
      *
      * @param $dictionary Name of the dictionary file
+     * @param $hash SHA1 hash of the dictionary
      *
      * @return string
      */
-    public function getDictionaryPartsPath($dictionary)
+    public function getDictionaryPartsPath($dictionary, $hash)
     {
-        return $this->getDictionaryPath($dictionary) . '.parts';
+        return sprintf('%s-%s.parts', $this->getDictionaryPath($dictionary), $hash);
     }
 
     /**

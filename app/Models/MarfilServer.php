@@ -89,17 +89,24 @@ class MarfilServer extends MarfilCommon
      */
     private function refreshDictionary($dictionary)
     {
-        $this->command->info('Please, wait while refreshing dictionary ' . $dictionary);
+        $this->command->line('Please, wait while refreshing dictionary ' . $dictionary);
 
         $dictionaryPath = $this->getDictionaryPath($dictionary);
-        $dictionaryPartsPath = $this->getDictionaryPartsPath($dictionary);
+
+        $this->command->line('Calculating SHA1 of dictionary...');
+
+        $hash = sha1_file($dictionaryPath);
+
+        $dictionaryPartsPath = $this->getDictionaryPartsPath($dictionary, $hash);
 
         File::makeDirectory($dictionaryPartsPath, 0755, false, true);
 
         // Split file into pieces
         $filesCreated = $this->splitFile($dictionaryPath, $dictionaryPartsPath);
 
-        $this->repo->saveDictionary($dictionary, $filesCreated);
+        $this->repo->saveDictionary($dictionary, $hash, $filesCreated);
+
+        $this->command->info('Dictionary successuflly refreshed.' . "\n");
     }
 
     /**
