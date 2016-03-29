@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Repositories\MarfilRepository;
 use Exception;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 
 class MarfilServer extends MarfilCommon
 {
@@ -48,7 +47,7 @@ class MarfilServer extends MarfilCommon
         $id = $this->repo->saveCrackRequest($mac);
 
         // Try to save the file
-        Storage::put($this->getCapFilename($id), $fileContents);
+        File::put($this->getCapFilepath($id), $fileContents);
 
         // Add work units
         $dictionaries = $this->repo->getAllDictionaries();

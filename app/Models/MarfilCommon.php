@@ -66,15 +66,15 @@ class MarfilCommon
     }
 
     /**
-     * Return a valid .cap file name for the given crack request id.
+     * Return the .cap file path for a given crack request id.
      *
      * @param $id Crack request id
      *
      * @return string
      */
-    public function getCapFilename($id)
+    public function getCapFilepath($id)
     {
-        return sprintf('%s.cap', $id);
+        return sprintf($this->getCapFilesPath() . '/%s.cap', $id);
     }
 
     /**
