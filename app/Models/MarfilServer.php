@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Repositories\MarfilRepository;
 use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
 
 class MarfilServer extends MarfilCommon
@@ -86,6 +87,10 @@ class MarfilServer extends MarfilCommon
      * Recreates the dictionary's directory
      *
      * @param $dictionary
+     *
+     * @return void
+     *
+     * @throws QueryException If dictionary hash is duplicated
      */
     private function refreshDictionary($dictionary)
     {
@@ -97,14 +102,22 @@ class MarfilServer extends MarfilCommon
 
         $hash = sha1_file($dictionaryPath);
 
-        $dictionaryPartsPath = $this->getDictionaryPartsPath($dictionary, $hash);
+        $dictionaryPartsPath = $this->getDictionaryPartsPath($hash, $dictionary);
 
         File::makeDirectory($dictionaryPartsPath, 0755, false, true);
 
-        // Split file into pieces
+        $this->command->line('Splitting dictionary into parts...');
+
         $filesCreated = $this->splitFile($dictionaryPath, $dictionaryPartsPath);
 
-        $this->repo->saveDictionary($dictionary, $hash, $filesCreated);
+        try {
+            $this->repo->saveDictionary($dictionary, $hash, $filesCreated);
+        } catch (QueryException $e) {
+            $this->command->error(
+                'Error while adding dictionary to the database. There might be dictionaries with same content.'
+            );
+            throw $e;
+        }
 
         $this->command->info('Dictionary successuflly refreshed.' . "\n");
     }
