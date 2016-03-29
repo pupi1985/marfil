@@ -38,9 +38,7 @@ class MarfilClient extends MarfilCommon
         $responseContent = app()->dispatch($request)->getContent();
 
         $responseObject = json_decode($responseContent);
-        if ($responseObject->result == 'error') {
-            throw new Exception($responseObject->message);
-        }
+        $this->handleError($responseObject);
         $this->command->info($responseObject->message);
     }
 
@@ -58,9 +56,7 @@ class MarfilClient extends MarfilCommon
         $responseContent = $this->sendWorkRequest($server);
 
         $responseObject = json_decode($responseContent);
-        if ($responseObject->result == 'error') {
-            throw new Exception($responseObject->message);
-        }
+        $this->handleError($responseObject);
 
         $this->command->info($responseObject->message);
     }
@@ -110,6 +106,20 @@ class MarfilClient extends MarfilCommon
         $this->command->line(sprintf('Cracking speed is %s k/s (keys per second)', $speed));
 
         return $speed;
+    }
+
+    /**
+     * Throws an exception if an error is returned in the response.
+     *
+     * @param $responseObject
+     *
+     * @throws Exception
+     */
+    private function handleError($responseObject)
+    {
+        if ($responseObject->result == 'error') {
+            throw new Exception($responseObject->message);
+        }
     }
 
 }

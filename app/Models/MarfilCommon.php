@@ -62,6 +62,7 @@ class MarfilCommon
     public function getAppStoragePath()
     {
         $defaultFilesystem = Storage::getDefaultDriver();
+
         return config('filesystems.disks.' . $defaultFilesystem . '.root');
     }
 
