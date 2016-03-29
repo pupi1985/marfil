@@ -3,6 +3,8 @@
 namespace App\Console;
 
 use App\Console\Commands\MarfilClientCrackCommand;
+use App\Console\Commands\MarfilClientWorkCommand;
+use App\Console\Commands\MarfilServerDictionaryCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
 
@@ -15,6 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         MarfilClientCrackCommand::class,
+        MarfilClientWorkCommand::class,
+        MarfilServerDictionaryCommand::class,
     ];
 
     /**

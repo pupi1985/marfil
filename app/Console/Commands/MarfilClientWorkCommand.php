@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\MarfilClient;
 use Illuminate\Console\Command;
 
-class MarfilClientCrackCommand extends Command
+class MarfilClientWorkCommand extends Command
 {
     /**
      * Client which the command will interact with.
@@ -19,26 +19,26 @@ class MarfilClientCrackCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'marfil:crack {server} {file} {bssid}';
+    protected $signature = 'marfil:work {server}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Send a crack request to the server';
+    protected $description = 'Start working (wait for work and do it when there is any)';
 
     /**
      * Create a new command instance.
      *
-     * @param MarfilClient $server
+     * @param MarfilClient $client
      */
-    public function __construct(MarfilClient $server)
+    public function __construct(MarfilClient $client)
     {
         parent::__construct();
 
-        $this->client = $server;
-        $server->setCommand($this);
+        $this->client = $client;
+        $client->setCommand($this);
     }
 
     /**
@@ -50,12 +50,10 @@ class MarfilClientCrackCommand extends Command
     {
         try {
             $server = $this->argument('server');
-            $file = $this->argument('file');
-            $bssid = $this->argument('bssid');
 
-            $this->line('Sending crack request...');
+            $this->line('Starting to work...');
 
-            $this->client->crack($server, $file, $bssid);
+            $this->client->work($server);
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }

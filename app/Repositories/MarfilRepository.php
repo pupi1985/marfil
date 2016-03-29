@@ -20,8 +20,65 @@ class MarfilRepository
         $id = DB::table('crack_requests')->insertGetId([
             'bssid' => $bssid,
             'created_at' => time(),
+            'finished' => false,
         ]);
 
         return $id;
+    }
+
+    /**
+     * Save a new dictionary into the database.
+     *
+     * @param $name Name of the dictionary
+     * @param $parts Amount of parts of the dictionary
+     *
+     * @return void
+     */
+    public function saveDictionary($name, $parts)
+    {
+        DB::table('dictionaries')->insert([
+            'name' => $name,
+            'parts' => $parts,
+        ]);
+    }
+
+    /**
+     * Delete all dictionaries from the database.
+     *
+     * @return void
+     */
+    public function deleteAllDictionaries()
+    {
+        DB::table('dictionaries')->truncate();
+    }
+
+    /**
+     * Save a work unit to the database.
+     *
+     * @param $dictionaryId Foreign key of the dictionary
+     * @param $crackRequestId Foreign key of the crack request
+     * @param $part Part number of the dictionary
+     * @param $assigned_at Last assignment time
+     *
+     * @return void
+     */
+    public function saveWorkUnit($dictionaryId, $crackRequestId, $part, $assigned_at)
+    {
+        DB::table('work_units')->insert([
+            'part' => $part,
+            'assigned_at' => $assigned_at,
+            'crack_request_id' => $crackRequestId,
+            'dictionary_id' => $dictionaryId,
+        ]);
+    }
+
+    /**
+     * Get all dictionaries from the detabase.
+     *
+     * @return array
+     */
+    public function getAllDictionaries()
+    {
+        return DB::table('dictionaries')->get();
     }
 }

@@ -12,3 +12,4 @@
 */
 
 $app->post('/crack', 'MarfilController@crackRequest');
+$app->post('/work', 'MarfilController@workRequest');

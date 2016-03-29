@@ -3,41 +3,42 @@
 namespace App\Console\Commands;
 
 use App\Models\MarfilClient;
+use App\Models\MarfilServer;
 use Illuminate\Console\Command;
 
-class MarfilClientCrackCommand extends Command
+class MarfilServerDictionaryCommand extends Command
 {
     /**
      * Client which the command will interact with.
      *
-     * @var MarfilClient
+     * @var MarfilServer
      */
-    private $client;
+    private $server;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'marfil:crack {server} {file} {bssid}';
+    protected $signature = 'marfil:refresh-dictionaries';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Send a crack request to the server';
+    protected $description = 'Split dictionaries and set them up in the dictionaries table';
 
     /**
      * Create a new command instance.
      *
-     * @param MarfilClient $server
+     * @param MarfilServer $server
      */
-    public function __construct(MarfilClient $server)
+    public function __construct(MarfilServer $server)
     {
         parent::__construct();
 
-        $this->client = $server;
+        $this->server = $server;
         $server->setCommand($this);
     }
 
@@ -49,13 +50,9 @@ class MarfilClientCrackCommand extends Command
     public function handle()
     {
         try {
-            $server = $this->argument('server');
-            $file = $this->argument('file');
-            $bssid = $this->argument('bssid');
+            $this->line('Refreshing dictionaries...');
 
-            $this->line('Sending crack request...');
-
-            $this->client->crack($server, $file, $bssid);
+            $this->server->refreshDictionaries();
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }

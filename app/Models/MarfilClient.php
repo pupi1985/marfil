@@ -9,25 +9,8 @@ use Illuminate\Support\Facades\File;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
-class MarfilClient
+class MarfilClient extends MarfilCommon
 {
-    /**
-     * Command that called the client.
-     *
-     * @var \Illuminate\Console\Command
-     */
-    private $command;
-
-    /**
-     * Set the Command that called the client.
-     *
-     * @param \Illuminate\Console\Command $command
-     */
-    public function setCommand($command)
-    {
-        $this->command = $command;
-    }
-
     /**
      * Send the server a crack request.
      *
@@ -59,6 +42,47 @@ class MarfilClient
             throw new Exception($responseObject->message);
         }
         $this->command->info($responseObject->message);
+    }
+
+    /**
+     * Send the server a work request.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws Exception
+     */
+    public function work($server)
+    {
+        $responseContent = $this->sendWorkRequest($server);
+
+        $responseObject = json_decode($responseContent);
+        if ($responseObject->result == 'error') {
+            throw new Exception($responseObject->message);
+        }
+
+        $this->command->info($responseObject->message);
+    }
+
+    /**
+     * Send a work request to the server.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws Exception
+     */
+    private function sendWorkRequest($server)
+    {
+        // Prepare and send the work request
+        $request = Request::create(
+            'http://' . $server . '/work',
+            'POST'
+        );
+
+        return app()->dispatch($request)->getContent();
     }
 
     /**
