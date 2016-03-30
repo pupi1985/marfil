@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MarfilServer;
+use App\Models\MessageResults;
 use App\Repositories\MarfilRepository;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -46,18 +47,18 @@ class MarfilController extends Controller
             $this->server->addCrackRequest($file, $fileHash, $mac);
 
             $result = [
-                'result' => 'success',
+                'result' => MessageResults::SUCCESS,
                 'message' => 'File saved successfully!',
             ];
         } catch (QueryException $e) {
             $result = [
-                'result' => 'error',
+                'result' => MessageResults::ERROR,
                 'message' => 'Error saving new crack request. The bssid might be present already.' . PHP_EOL
                     . $e->getMessage(),
             ];
         } catch (Exception $e) {
             $result = [
-                'result' => 'error',
+                'result' => MessageResults::ERROR,
                 'message' => $e->getMessage(),
             ];
         }

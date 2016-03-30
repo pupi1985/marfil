@@ -117,7 +117,7 @@ class MarfilClient extends MarfilCommon
      */
     private function handleError($responseObject)
     {
-        if ($responseObject->result == 'error') {
+        if ($responseObject->result == MessageResults::ERROR) {
             throw new Exception($responseObject->message);
         }
     }
