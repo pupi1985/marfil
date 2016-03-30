@@ -114,4 +114,19 @@ class MarfilController extends Controller
         return response()->download($filePath);
     }
 
+    /**
+     * Return a response to download the part file for the given dictionary hash and part number.
+     *
+     * @param string $hash Dictionary hash
+     * @param int $partNumber Part number of the dictionary
+     *
+     * @return Response
+     */
+    public function downloadPartRequest($hash, $partNumber)
+    {
+        $filePath = $this->server->getDictionaryPartPath($hash, $partNumber);
+
+        return response()->download($filePath);
+    }
+
 }

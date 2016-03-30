@@ -68,6 +68,12 @@ class MarfilClient extends MarfilCommon
 
             // Download and save .cap file
             $this->sendCapDownloadRequest($server, $capFileId, $this->getCapFilepath($capFileId));
+
+            // Check if dictionary part file is present and download it if not
+            if (!File::exists($partFilePath)) {
+                File::makeDirectory($this->getDictionaryPartsPath($hash), 0755, false, true);
+                $this->sendPartFileDownloadRequest($server, $hash, $partNumber, $partFilePath);
+            }
         }
 
         $this->command->info($responseObject->message);
@@ -87,6 +93,24 @@ class MarfilClient extends MarfilCommon
         $this->sendFileDownloadRequest(
             sprintf('http://%s/download-cap/%s', $server, $crackRequestId),
             $capFilePath
+        );
+    }
+
+    /**
+     * Send a part file download request to the server.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     * @param int $partNumber Part number of the dictionary file
+     * @param string $partFilePath Path to the part file to store the result into
+     *
+     * @return void
+     *
+     */
+    private function sendPartFileDownloadRequest($server, $hash, $partNumber, $partFilePath)
+    {
+        $this->sendFileDownloadRequest(
+            sprintf('http://%s/download-part/%s/%s', $server, $hash, $partNumber),
+            $partFilePath
         );
     }
 
