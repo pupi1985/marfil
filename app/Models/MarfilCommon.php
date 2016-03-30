@@ -69,7 +69,7 @@ class MarfilCommon
     /**
      * Return the .cap file path for a given crack request id.
      *
-     * @param $id Crack request id
+     * @param int $id Crack request id
      *
      * @return string
      */
@@ -101,7 +101,7 @@ class MarfilCommon
     /**
      * Return the dictionary path for a given dictionary.
      *
-     * @param $dictionary Name of the dictionary file
+     * @param string $dictionary Name of the dictionary file
      *
      * @return string
      */
@@ -113,17 +113,31 @@ class MarfilCommon
     /**
      * Return the dictionary parts path for a given dictionary.
      *
-     * @param $hash SHA1 hash of the dictionary
-     * @param $dictionary Name of the dictionary file
+     * @param string $hash SHA1 hash of the dictionary
+     * @param string $dictionary Name of the dictionary file
      *
      * @return string
      */
     public function getDictionaryPartsPath($hash, $dictionary = null)
     {
-        $pattern = is_null($dictionary) ? '' : '%s-';
+        $pattern = is_null($dictionary) ? '' : sprintf('%s-', $dictionary);
         $pattern .= '%s.parts';
 
-        return sprintf($pattern, $this->getDictionaryPath($dictionary), $hash);
+        return $this->getDictionariesPath() . '/' . sprintf($pattern, $hash);
+    }
+
+    /**
+     * Return the dictionary part path for a given dictionary and part number.
+     *
+     * @param string $hash SHA1 hash of the dictionary
+     * @param string $dictionary Name of the dictionary
+     * @param int $partNumber Part number of the dictionary
+     *
+     * @return string
+     */
+    public function getDictionaryPartPath($hash, $dictionary = null, $partNumber)
+    {
+        return $this->getDictionaryPartsPath($hash, $dictionary) . '/' . $partNumber . '.txt';
     }
 
     /**
