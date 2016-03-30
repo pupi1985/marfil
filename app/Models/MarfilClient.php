@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Exception;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -58,7 +59,35 @@ class MarfilClient extends MarfilCommon
         $responseObject = json_decode($responseContent);
         $this->handleError($responseObject);
 
+        if ($responseObject->result == MessageResults::WORK_NEEDED) {
+            $capFileId = $responseObject->data->crack_request_id;
+            $hash = $responseObject->data->dictionary_hash;
+            $partNumber = $responseObject->data->part_number;
+            $mac = $responseObject->data->mac;
+            $partFilePath = $this->getDictionaryPartPath($hash, null, $partNumber);
+
+            // Download and save .cap file
+            $this->sendCapDownloadRequest($server, $capFileId, $this->getCapFilepath($capFileId));
+        }
+
         $this->command->info($responseObject->message);
+    }
+
+    /**
+     * Send a .cap file download request to the server.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     * @param int $crackRequestId Crack request id which also matches the .cap file id
+     * @param string $capFilePath Path to the .cap file to store the result into
+     *
+     * @return void
+     */
+    private function sendCapDownloadRequest($server, $crackRequestId, $capFilePath)
+    {
+        $this->sendFileDownloadRequest(
+            sprintf('http://%s/download-cap/%s', $server, $crackRequestId),
+            $capFilePath
+        );
     }
 
     /**
@@ -111,7 +140,7 @@ class MarfilClient extends MarfilCommon
     /**
      * Throws an exception if an error is returned in the response.
      *
-     * @param $responseObject
+     * @param \stdClass $responseObject
      *
      * @throws Exception
      */
@@ -122,4 +151,19 @@ class MarfilClient extends MarfilCommon
         }
     }
 
+    /**
+     * Send a file download request to the server and save it locally.
+     *
+     * @param string $uri URI of the file to download
+     * @param string Path of the file to download the stream to
+     *
+     * @return void
+     */
+    private function sendFileDownloadRequest($uri, $path)
+    {
+        (new Client())->request('GET', $uri, ['sink' => $path]);
+
+        // Seems to be needed to avoid issues with the console output
+        sleep(1);
+    }
 }

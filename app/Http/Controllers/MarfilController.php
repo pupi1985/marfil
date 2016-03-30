@@ -77,17 +77,41 @@ class MarfilController extends Controller
     {
         try {
             $result = [
-                'result' => 'success',
-                'message' => 'File saved successfully!',
+                'result' => MessageResults::WORK_NEEDED,
+                'message' => 'Assigning new work unit.',
+                'data' => [
+                    'crack_request_id' => 1,
+                    'mac' => '01:23:45:67:89:AB',
+                    'dictionary_hash' => '16dc8ef9cad85ac333a63e7e00e8c61eac444f22',
+                    'part_number' => 1,
+                ],
             ];
+//            $result = [
+//                'result' => MessageResults::NO_WORK_NEEDED,
+//                'message' => 'No work is needed at the moment.',
+//            ];
         } catch (Exception $e) {
             $result = [
-                'result' => 'error',
+                'result' => MessageResults::ERROR,
                 'message' => $e->getMessage(),
             ];
         }
 
         return response()->json($result);
+    }
+
+    /**
+     * Return a response to download the .cap file for the given id.
+     *
+     * @param int $id
+     *
+     * @return Response
+     */
+    public function downloadCapRequest($id)
+    {
+        $filePath = $this->server->getCapFilepath($id);
+
+        return response()->download($filePath);
     }
 
 }
