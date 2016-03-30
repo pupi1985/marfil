@@ -114,30 +114,25 @@ class MarfilCommon
      * Return the dictionary parts path for a given dictionary.
      *
      * @param string $hash SHA1 hash of the dictionary
-     * @param string $dictionary Name of the dictionary file
      *
      * @return string
      */
-    public function getDictionaryPartsPath($hash, $dictionary = null)
+    public function getDictionaryPartsPath($hash)
     {
-        $pattern = is_null($dictionary) ? '' : sprintf('%s-', $dictionary);
-        $pattern .= '%s.parts';
-
-        return $this->getDictionariesPath() . '/' . sprintf($pattern, $hash);
+        return $this->getDictionariesPath() . '/' . sprintf('%s.parts', $hash);
     }
 
     /**
      * Return the dictionary part path for a given dictionary and part number.
      *
      * @param string $hash SHA1 hash of the dictionary
-     * @param string $dictionary Name of the dictionary
      * @param int $partNumber Part number of the dictionary
      *
      * @return string
      */
-    public function getDictionaryPartPath($hash, $dictionary = null, $partNumber)
+    public function getDictionaryPartPath($hash, $partNumber)
     {
-        return $this->getDictionaryPartsPath($hash, $dictionary) . '/' . $partNumber . '.txt';
+        return $this->getDictionaryPartsPath($hash) . '/' . $partNumber . '.txt';
     }
 
     /**

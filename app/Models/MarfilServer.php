@@ -102,7 +102,7 @@ class MarfilServer extends MarfilCommon
 
         $hash = sha1_file($dictionaryPath);
 
-        $dictionaryPartsPath = $this->getDictionaryPartsPath($hash, $dictionary);
+        $dictionaryPartsPath = $this->getDictionaryPartsPath($hash);
 
         File::makeDirectory($dictionaryPartsPath, 0755, false, true);
 

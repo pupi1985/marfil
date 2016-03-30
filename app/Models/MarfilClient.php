@@ -64,7 +64,7 @@ class MarfilClient extends MarfilCommon
             $hash = $responseObject->data->dictionary_hash;
             $partNumber = $responseObject->data->part_number;
             $mac = $responseObject->data->mac;
-            $partFilePath = $this->getDictionaryPartPath($hash, null, $partNumber);
+            $partFilePath = $this->getDictionaryPartPath($hash, $partNumber);
 
             // Download and save .cap file
             $this->sendCapDownloadRequest($server, $capFileId, $this->getCapFilepath($capFileId));
