@@ -70,12 +70,15 @@ class MarfilCommon
      * Return the .cap file path for a given crack request id.
      *
      * @param int $id Crack request id
+     * @param bool $temp Determines if the file should have a temporary name
      *
      * @return string
      */
-    public function getCapFilepath($id)
+    public function getCapFilepath($id, $temp = false)
     {
-        return sprintf($this->getCapFilesPath() . '/%s.cap', $id);
+        $pattern = $temp ? '/%s.temp.cap' : '/%s.cap';
+
+        return sprintf($this->getCapFilesPath() . $pattern, $id);
     }
 
     /**

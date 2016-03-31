@@ -81,8 +81,8 @@ class MarfilController extends Controller
                 'message' => 'Assigning new work unit.',
                 'data' => [
                     'crack_request_id' => 1,
-                    'mac' => '01:23:45:67:89:AB',
-                    'dictionary_hash' => '16dc8ef9cad85ac333a63e7e00e8c61eac444f22',
+                    'mac' => 'c8:d7:19:7f:44:6c',
+                    'dictionary_hash' => 'ecde057ffc48271b20d40d89aaa03923a8bbd1e3',
                     'part_number' => 1,
                 ],
             ];

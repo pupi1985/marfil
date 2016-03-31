@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -16,27 +17,32 @@ class MarfilClient extends MarfilCommon
      * Send the server a crack request.
      *
      * @param string $server Server to send the request to (only hostname and port)
-     * @param string $file Path for the .cap file to attach to the request
-     * @param string $bssid Bssid of the network to crack as a formatted string
+     * @param string $capFilePath Path for the .cap file to attach to the request
+     * @param string $mac Bssid of the network to crack as a formatted string
      *
      * @throws Exception
      */
-    public function crack($server, $file, $bssid)
+    public function crack($server, $capFilePath, $mac)
     {
+        $capFilePath= $this->compactCapFile($capFilePath, $mac);
+
         // Prepare and send crack request
-        $uploadedFile = new UploadedFile($file, File::basename($file), null, File::size($file));
+        $uploadedFile = new UploadedFile($capFilePath, File::basename($capFilePath), null, File::size($capFilePath));
         $request = Request::create(
             'http://' . $server . '/crack',
             'POST',
             [
-                'bssid' => $bssid,
-                'file_hash' => sha1_file($file),
+                'bssid' => $mac,
+                'file_hash' => sha1_file($capFilePath),
             ],
             [],
             ['file' => $uploadedFile]
         );
 
         $responseContent = app()->dispatch($request)->getContent();
+
+        // Delete sent file
+        File::delete($capFilePath);
 
         $responseObject = json_decode($responseContent);
         $this->handleError($responseObject);
@@ -64,10 +70,11 @@ class MarfilClient extends MarfilCommon
             $hash = $responseObject->data->dictionary_hash;
             $partNumber = $responseObject->data->part_number;
             $mac = $responseObject->data->mac;
+            $capFilePath = $this->getCapFilepath($capFileId);
             $partFilePath = $this->getDictionaryPartPath($hash, $partNumber);
 
             // Download and save .cap file
-            $this->sendCapDownloadRequest($server, $capFileId, $this->getCapFilepath($capFileId));
+            $this->sendCapDownloadRequest($server, $capFileId, $capFilePath);
 
             // Check if dictionary part file is present and download it if not
             if (!File::exists($partFilePath)) {
@@ -189,5 +196,37 @@ class MarfilClient extends MarfilCommon
 
         // Seems to be needed to avoid issues with the console output
         sleep(1);
+    }
+
+    /**
+     * Removes unnecessary information from .cap file, leaving the handshake.
+     *
+     * @param string $capFilePath Path to the .cap file
+     * @param string $mac Bssid to check if it is contained in the .cap file
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
+    private function compactCapFile($capFilePath, $mac)
+    {
+        $this->command->line(sprintf('Compacting .cap file %s.', File::basename($capFilePath)));
+
+        $outputCapFilePath = $this->getCapFilepath(0, true);
+
+        $process = new Process(sprintf('wpaclean %s %s', $outputCapFilePath, $capFilePath));
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        $output = $process->getOutput();
+
+        if (!Str::contains($output, $mac)) {
+            throw new Exception(sprintf('The .cap file might not contain a handshake for mac %s.', $mac));
+        }
+
+        return $outputCapFilePath;
     }
 }
