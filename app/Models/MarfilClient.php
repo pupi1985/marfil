@@ -24,7 +24,7 @@ class MarfilClient extends MarfilCommon
      */
     public function crack($server, $capFilePath, $mac)
     {
-        $capFilePath= $this->compactCapFile($capFilePath, $mac);
+        $capFilePath = $this->compactCapFile($capFilePath, $mac);
 
         // Prepare and send crack request
         $uploadedFile = new UploadedFile($capFilePath, File::basename($capFilePath), null, File::size($capFilePath));
@@ -81,6 +81,8 @@ class MarfilClient extends MarfilCommon
                 File::makeDirectory($this->getDictionaryPartsPath($hash), 0755, false, true);
                 $this->sendPartFileDownloadRequest($server, $hash, $partNumber, $partFilePath);
             }
+
+            $pass = $this->startCrackProcess($partFilePath, $capFilePath, $mac);
         }
 
         $this->command->info($responseObject->message);
@@ -166,6 +168,42 @@ class MarfilClient extends MarfilCommon
         $this->command->line(sprintf('Cracking speed is %s k/s (keys per second)', $speed));
 
         return $speed;
+    }
+
+    /**
+     * Crack a .cap file and return the password if found, null if not found or throw an exception otherwise.
+     *
+     * @param string $partFilePath Path to the dictionary part file
+     * @param string $capFilePath Path to .cap file to crack
+     * @param string $mac Bssid to crack
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
+    private function startCrackProcess($partFilePath, $capFilePath, $mac)
+    {
+        $this->command->line(sprintf(
+            'Starting to crack %s using dictionary part %s. This might take a while...',
+            $mac,
+            File::basename($partFilePath)
+        ));
+        $process = new Process(sprintf('aircrack-ng -w %s -b %s -q %s', $partFilePath, $mac, $capFilePath));
+        $process->run();
+
+        $output = $process->getOutput();
+        if (!$process->isSuccessful()) {
+            if (Str::contains('Passphrase not in dictionary', $output)) {
+                return null;
+            }
+            throw new ProcessFailedException($process);
+        }
+
+        if (preg_match('/KEY FOUND! \[ (.*) \]/i', $output, $matches)) {
+            return $matches[1];
+        }
+
+        throw new Exception('An unexpected result has been returned from the cracking process: ' . PHP_EOL . $output);
     }
 
     /**
