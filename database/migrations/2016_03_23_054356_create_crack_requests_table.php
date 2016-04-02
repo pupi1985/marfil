@@ -14,7 +14,7 @@ class CreateCrackRequestsTable extends Migration
     {
         Schema::create('crack_requests', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('bssid');
+            $table->macAddress('bssid');
             $table->datetime('created_at');
 
             $table->unique('bssid');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MarfilCommon
 {
@@ -24,32 +25,19 @@ class MarfilCommon
     }
 
     /**
-     * Turn a mac represented as a formatted string into an integer.
+     * Turn an incomplete mac represented as a string into a formatted mac address.
      *
-     * @param string $mac Mac represented as a formatted string
-     *
-     * @return int
-     */
-    public function fromHumanToMachine($mac)
-    {
-        $mac = str_replace([':', '-'], '', $mac);
-
-        return (int)base_convert($mac, 16, 10);
-    }
-
-    /**
-     * Turn a mac represented as an integer into a formatted string.
-     *
-     * @param int $mac Mac represented by an integer
+     * @param string $mac Mac represented by an unformatted string
      *
      * @return string
      */
-    public function fromMachineToHuman($mac)
+    public function normalizeMacAddress($mac)
     {
-        $mac = Str::upper($mac);
+        $mac = str_replace([':', '-'], '', $mac);
         $mac = str_pad($mac, 12, '0', STR_PAD_LEFT);
         $mac = str_split($mac, 2);
         $mac = implode(':', $mac);
+        $mac = Str::upper($mac);
 
         return $mac;
     }

@@ -14,7 +14,7 @@ class MarfilController extends Controller
     /**
      * Store the Marfil server.
      *
-     * @var MarfilRepository
+     * @var MarfilServer
      */
     private $server;
 
@@ -33,7 +33,7 @@ class MarfilController extends Controller
     public function crackRequest()
     {
         $bssid = Request::get('bssid');
-        $mac = $this->server->fromHumanToMachine($bssid);
+        $mac = $this->server->normalizeMacAddress($bssid);
         $fileHash = Request::get('file_hash');
 
         try {
