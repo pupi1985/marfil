@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class MarfilRepository
@@ -19,7 +20,7 @@ class MarfilRepository
     {
         $id = DB::table('crack_requests')->insertGetId([
             'bssid' => $bssid,
-            'created_at' => time(),
+            'created_at' => Carbon::createFromTimestamp(time()),
         ]);
 
         return $id;
@@ -81,5 +82,38 @@ class MarfilRepository
     public function getAllDictionaries()
     {
         return DB::table('dictionaries')->get();
+    }
+
+    /**
+     * Return a single work unit ordered by the oldest crack request and assigned part.
+     *
+     * If a work unit is present in the database then it has not yet finished and represents work left to do.
+     *
+     * @return array
+     */
+    public function getOldestWorkUnit()
+    {
+        return DB::table('work_units as wu')
+            ->join('crack_requests as cr', 'wu.crack_request_id', '=', 'cr.id')
+            ->join('dictionaries as d', 'wu.dictionary_id', '=', 'd.id')
+            ->orderBy('cr.created_at', 'desc')
+            ->orderBy('wu.assigned_at')
+            ->orderBy('wu.part')
+            ->take(1)
+            ->first(['wu.id', 'wu.part', 'cr.id as cr_id', 'cr.bssid', 'd.hash']);
+    }
+
+    /**
+     * Set the the work united as assigned now.
+     *
+     * @param int $id Work unit id
+     *
+     * @return void
+     */
+    public function assignWorkUnit($id)
+    {
+        DB::table('work_units')
+            ->where('id', $id)
+            ->update(['assigned_at' => Carbon::createFromTimestamp(time())]);
     }
 }

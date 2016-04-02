@@ -186,7 +186,7 @@ class MarfilClient extends MarfilCommon
         $this->command->line(sprintf(
             'Starting to crack %s using dictionary part %s. This might take a while...',
             $mac,
-            File::basename($partFilePath)
+            File::basename(File::dirname($partFilePath)) . '/' . File::basename($partFilePath)
         ));
         $process = new Process(sprintf('aircrack-ng -w %s -b %s -q %s', $partFilePath, $mac, $capFilePath));
         $process->run();

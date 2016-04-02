@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\MarfilServer;
 use App\Models\MessageResults;
-use App\Repositories\MarfilRepository;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Request;
@@ -76,20 +75,25 @@ class MarfilController extends Controller
     public function workRequest()
     {
         try {
-            $result = [
-                'result' => MessageResults::WORK_NEEDED,
-                'message' => 'Assigning new work unit.',
-                'data' => [
-                    'crack_request_id' => 1,
-                    'mac' => 'c8:d7:19:7f:44:6c',
-                    'dictionary_hash' => 'ecde057ffc48271b20d40d89aaa03923a8bbd1e3',
-                    'part_number' => 1,
-                ],
-            ];
-//            $result = [
-//                'result' => MessageResults::NO_WORK_NEEDED,
-//                'message' => 'No work is needed at the moment.',
-//            ];
+            $workUnit = $this->server->assignWorkUnit();
+
+            if (is_null($workUnit)) {
+                $result = [
+                    'result' => MessageResults::NO_WORK_NEEDED,
+                    'message' => 'No work is needed at the moment.',
+                ];
+            } else {
+                $result = [
+                    'result' => MessageResults::WORK_NEEDED,
+                    'message' => 'Assigning new work unit.',
+                    'data' => [
+                        'crack_request_id' => $workUnit->cr_id,
+                        'mac' => $workUnit->bssid,
+                        'dictionary_hash' => $workUnit->hash,
+                        'part_number' => $workUnit->part,
+                    ],
+                ];
+            }
         } catch (Exception $e) {
             $result = [
                 'result' => MessageResults::ERROR,

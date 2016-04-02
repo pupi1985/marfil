@@ -37,9 +37,8 @@ class MarfilCommon
         $mac = str_pad($mac, 12, '0', STR_PAD_LEFT);
         $mac = str_split($mac, 2);
         $mac = implode(':', $mac);
-        $mac = Str::upper($mac);
 
-        return $mac;
+        return Str::upper($mac);
     }
 
     /**

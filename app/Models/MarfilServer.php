@@ -84,6 +84,24 @@ class MarfilServer extends MarfilCommon
     }
 
     /**
+     * Return an avaiable work unit and set it as assigned
+     *
+     * @return array
+     */
+    public function assignWorkUnit()
+    {
+        $workUnit = $this->repo->getOldestWorkUnit();
+
+        if (is_null($workUnit)) {
+            return null;
+        }
+
+        $this->repo->assignWorkUnit($workUnit->id);
+
+        return $workUnit;
+    }
+
+    /**
      * Recreates the dictionary's directory
      *
      * @param $dictionary
