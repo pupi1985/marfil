@@ -193,7 +193,7 @@ class MarfilClient extends MarfilCommon
 
         $output = $process->getOutput();
         if (!$process->isSuccessful()) {
-            if (Str::contains('Passphrase not in dictionary', $output)) {
+            if (Str::contains($output, 'Passphrase not in dictionary')) {
                 return null;
             }
             throw new ProcessFailedException($process);
