@@ -21,7 +21,7 @@ class CreateWorkUnitsTable extends Migration
             $table->integer('dictionary_id')->unsigned();
             $table->foreign('dictionary_id')->references('id')->on('dictionaries')->onDelete('cascade');
 
-            $table->index('assigned_at');
+            $table->index(['assigned_at', 'part']);
         });
     }
 

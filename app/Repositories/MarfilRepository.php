@@ -20,7 +20,6 @@ class MarfilRepository
         $id = DB::table('crack_requests')->insertGetId([
             'bssid' => $bssid,
             'created_at' => time(),
-            'finished' => false,
         ]);
 
         return $id;
