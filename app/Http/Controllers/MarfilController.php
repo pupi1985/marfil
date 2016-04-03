@@ -87,6 +87,7 @@ class MarfilController extends Controller
                     'result' => MessageResults::WORK_NEEDED,
                     'message' => 'Assigning new work unit.',
                     'data' => [
+                        'work_unit_id' => $workUnit->id,
                         'crack_request_id' => $workUnit->cr_id,
                         'mac' => $workUnit->bssid,
                         'dictionary_hash' => $workUnit->hash,
@@ -102,6 +103,24 @@ class MarfilController extends Controller
         }
 
         return response()->json($result);
+    }
+
+    /**
+     * Process a result request.
+     *
+     * @return \Illuminate\Http\JsonResponse;
+     */
+    public function resultRequest()
+    {
+        $workUnitId = Request::get('work_unit_id');
+        $pass = Request::get('pass');
+
+        $this->server->processResult($workUnitId, $pass);
+
+        return response()->json([
+            'result' => MessageResults::SUCCESS,
+            'message' => 'Result has been received. You can ask for new work.',
+        ]);
     }
 
     /**

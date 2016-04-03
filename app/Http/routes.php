@@ -13,5 +13,7 @@
 
 $app->post('/crack', 'MarfilController@crackRequest');
 $app->post('/work', 'MarfilController@workRequest');
+$app->post('/result', 'MarfilController@resultRequest');
+
 $app->get('/download-cap/{id}', 'MarfilController@downloadCapRequest');
 $app->get('/download-part/{hash}/{id}', 'MarfilController@downloadPartRequest');

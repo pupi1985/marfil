@@ -20,6 +20,7 @@ class MarfilRepository
     {
         $id = DB::table('crack_requests')->insertGetId([
             'bssid' => $bssid,
+            'password' => null,
             'created_at' => Carbon::createFromTimestamp(time()),
         ]);
 
@@ -115,5 +116,71 @@ class MarfilRepository
         DB::table('work_units')
             ->where('id', $id)
             ->update(['assigned_at' => Carbon::createFromTimestamp(time())]);
+    }
+
+    /**
+     * Delete the given work unit.
+     *
+     * @param int $workUnitId Work unit id to delete
+     *
+     * @return void
+     */
+    public function deleteWorkUnit($workUnitId)
+    {
+        DB::table('work_units')->delete($workUnitId);
+    }
+
+    /**
+     * Return a work unit row from its id.
+     *
+     * @param int $workUnitId Work unit id to look for
+     *
+     * @return stdClass
+     */
+    public function getWorkUnit($workUnitId)
+    {
+        return DB::table('work_units')->find($workUnitId);
+    }
+
+    /**
+     * Return a crack request row from its id.
+     *
+     * @param int $crackRequestId Crack request id
+     *
+     * @return stdClass
+     *
+     */
+    public function getCrackRequest($crackRequestId)
+    {
+        return DB::table('crack_requests')->find($crackRequestId);
+    }
+
+    /**
+     * Delete all work units for the given crack request id.
+     *
+     * @param int $crackRequestId Crack request id
+     *
+     * @return void
+     */
+    public function deleteAllWorkUnitsForCrackRequestId($crackRequestId)
+    {
+        DB::table('work_units')
+            ->where('crack_request_id', $crackRequestId)
+            ->delete();
+    }
+
+    /**
+     * Update the crack request that corresponds to the given crack request id.
+     *
+     * @param int $id Id of the crack request to update
+     * @param array $fields Fields and values to update
+     *
+     * @result void
+     */
+    public function updateCrackRequest($id, $fields)
+    {
+        DB::table('crack_requests')
+            ->where('id', $id)
+            ->update($fields);
     }
 }

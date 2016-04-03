@@ -84,7 +84,7 @@ class MarfilServer extends MarfilCommon
     }
 
     /**
-     * Return an avaiable work unit and set it as assigned
+     * Return an avaiable work unit and set it as assigned.
      *
      * @return array
      */
@@ -99,6 +99,29 @@ class MarfilServer extends MarfilCommon
         $this->repo->assignWorkUnit($workUnit->id);
 
         return $workUnit;
+    }
+
+    /**
+     * Process a result and reflect it into the database.
+     *
+     * @param int $workUnitId Work unit id for the server to mark as done
+     * @param string $pass Password string, if found. Null, if not found
+     */
+    public function processResult($workUnitId, $pass)
+    {
+        if (is_null($pass)) {
+            $this->repo->deleteWorkUnit($workUnitId);
+
+            info(sprintf('Work unit id %s has been processed.', $workUnitId));
+        } else {
+            $workUnit = $this->repo->getWorkUnit($workUnitId);
+            $crackRequest = $this->repo->getCrackRequest($workUnit->crack_request_id);
+
+            $this->repo->deleteAllWorkUnitsForCrackRequestId($crackRequest->id);
+            $this->repo->updateCrackRequest($crackRequest->id, ['password' => $pass]);
+
+            info(sprintf('Password found for bssid %s: [%s]', $crackRequest->bssid, $pass));
+        }
     }
 
     /**

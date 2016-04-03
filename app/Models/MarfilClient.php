@@ -11,6 +11,13 @@ use Illuminate\Support\Str;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
+/**
+ * Class MarfilClient
+ *
+ * Handle all the client logic.
+ *
+ * @package App\Models
+ */
 class MarfilClient extends MarfilCommon
 {
     /**
@@ -66,6 +73,7 @@ class MarfilClient extends MarfilCommon
         $this->handleError($responseObject);
 
         if ($responseObject->result == MessageResults::WORK_NEEDED) {
+            $workUnitId = $responseObject->data->work_unit_id;
             $capFileId = $responseObject->data->crack_request_id;
             $hash = $responseObject->data->dictionary_hash;
             $partNumber = $responseObject->data->part_number;
@@ -83,6 +91,11 @@ class MarfilClient extends MarfilCommon
             }
 
             $pass = $this->startCrackProcess($partFilePath, $capFilePath, $mac);
+
+            $responseContent = $this->sendResult($server, $workUnitId, $pass);
+
+            $responseObject = json_decode($responseContent);
+            $this->handleError($responseObject);
         }
 
         $this->command->info($responseObject->message);
@@ -266,5 +279,29 @@ class MarfilClient extends MarfilCommon
         }
 
         return $outputCapFilePath;
+    }
+
+    /**
+     * Send the result of a cracking process to the server. It can have a password or not.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     * @param int $workUnitId Work unit id for the server to mark as done
+     * @param string $pass Password string, if found. Null, if not found
+     *
+     * @return array
+     */
+    private function sendResult($server, $workUnitId, $pass)
+    {
+        // Prepare and send the result request
+        $request = Request::create(
+            'http://' . $server . '/result',
+            'POST',
+            [
+                'work_unit_id' => $workUnitId,
+                'pass' => $pass,
+            ]
+        );
+
+        return app()->dispatch($request)->getContent();
     }
 }
