@@ -148,12 +148,12 @@ class MarfilClient extends MarfilCommon
     private function sendWorkRequest($server)
     {
         // Prepare and send the work request
-        $request = Request::create(
-            'http://' . $server . '/work',
-            'POST'
-        );
+        $response = (new Client())->request('POST', 'http://' . $server . '/work', [
+            'synchronous' => true,
+            'form_params' => []
+        ]);
 
-        return app()->dispatch($request)->getContent();
+        return $response->getBody()->getContents();
     }
 
     /**
@@ -293,15 +293,14 @@ class MarfilClient extends MarfilCommon
     private function sendResult($server, $workUnitId, $pass)
     {
         // Prepare and send the result request
-        $request = Request::create(
-            'http://' . $server . '/result',
-            'POST',
-            [
+        $response = (new Client())->request('POST', 'http://' . $server . '/result', [
+            'synchronous' => true,
+            'form_params' => [
                 'work_unit_id' => $workUnitId,
                 'pass' => $pass,
-            ]
-        );
+            ],
+        ]);
 
-        return app()->dispatch($request)->getContent();
+        return $response->getBody()->getContents();
     }
 }
