@@ -49,12 +49,6 @@ class MarfilController extends Controller
                 'result' => MessageResults::SUCCESS,
                 'message' => 'File saved successfully!',
             ];
-        } catch (QueryException $e) {
-            $result = [
-                'result' => MessageResults::ERROR,
-                'message' => 'Error saving new crack request. The bssid might be present already.' . PHP_EOL
-                    . $e->getMessage(),
-            ];
         } catch (Exception $e) {
             $result = [
                 'result' => MessageResults::ERROR,

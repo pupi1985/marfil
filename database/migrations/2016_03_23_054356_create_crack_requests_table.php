@@ -18,7 +18,6 @@ class CreateCrackRequestsTable extends Migration
             $table->text('password')->nullable();
             $table->datetime('created_at');
 
-            $table->unique('bssid');
             $table->index('created_at');
         });
     }
