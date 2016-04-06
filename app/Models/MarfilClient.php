@@ -290,10 +290,10 @@ class MarfilClient extends MarfilCommon
      */
     private function sendFileDownloadRequest($uri, $path)
     {
-        (new Client())->request('GET', $uri, ['sink' => $path]);
-
-        // Seems to be needed to avoid issues with the console output
-        sleep(1);
+        (new Client())->request('GET', $uri, [
+            'synchronous' => true,
+            'sink' => $path,
+        ]);
     }
 
     /**
