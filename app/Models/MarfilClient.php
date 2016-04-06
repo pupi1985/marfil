@@ -210,6 +210,8 @@ class MarfilClient extends MarfilCommon
     private function getSpeed()
     {
         $process = new Process('aircrack-ng -S');
+        $process->setTimeout(0);
+        $process->setIdleTimeout(0);
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -245,6 +247,8 @@ class MarfilClient extends MarfilCommon
             File::basename(File::dirname($partFilePath)) . '/' . File::basename($partFilePath)
         ));
         $process = new Process(sprintf('aircrack-ng -w %s -b %s -q %s', $partFilePath, $mac, $capFilePath));
+        $process->setTimeout(0);
+        $process->setIdleTimeout(0);
         $process->run();
 
         $output = $process->getOutput();
@@ -309,6 +313,8 @@ class MarfilClient extends MarfilCommon
         $outputCapFilePath = $this->getCapFilepath(0, true);
 
         $process = new Process(sprintf('wpaclean %s %s', $outputCapFilePath, $capFilePath));
+        $process->setTimeout(0);
+        $process->setIdleTimeout(0);
         $process->run();
 
         if (!$process->isSuccessful()) {
