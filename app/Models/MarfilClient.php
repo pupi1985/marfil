@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Exception;
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -33,20 +31,7 @@ class MarfilClient extends MarfilCommon
     {
         $capFilePath = $this->compactCapFile($capFilePath, $mac);
 
-        // Prepare and send crack request
-        $uploadedFile = new UploadedFile($capFilePath, File::basename($capFilePath), null, File::size($capFilePath));
-        $request = Request::create(
-            'http://' . $server . '/crack',
-            'POST',
-            [
-                'bssid' => $mac,
-                'file_hash' => sha1_file($capFilePath),
-            ],
-            [],
-            ['file' => $uploadedFile]
-        );
-
-        $responseContent = app()->dispatch($request)->getContent();
+        $responseContent = $this->sendCrackRequest($server, $capFilePath, $mac);
 
         // Delete sent file
         File::delete($capFilePath);
@@ -54,6 +39,39 @@ class MarfilClient extends MarfilCommon
         $responseObject = json_decode($responseContent);
         $this->handleError($responseObject);
         $this->command->info($responseObject->message);
+    }
+
+    /**
+     * Send a crack request to the server.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     * @param string $capFilePath Path for the .cap file to attach to the request
+     * @param string $mac Bssid of the network to crack as a formatted string
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function sendCrackRequest($server, $capFilePath, $mac)
+    {
+        // Prepare and send the crack request
+        $response = (new Client())->request('POST', 'http://' . $server . '/crack', [
+            'synchronous' => true,
+            'multipart' => [
+                [
+                    'name' => 'bssid',
+                    'contents' => $mac,
+                ],
+                [
+                    'name' => 'file_hash',
+                    'contents' => sha1_file($capFilePath),
+                ],
+                [
+                    'name' => 'file',
+                    'contents' => fopen($capFilePath, 'rb'),
+                ],
+            ],
+        ]);
+
+        return $response->getBody()->getContents();
     }
 
     /**
@@ -102,6 +120,26 @@ class MarfilClient extends MarfilCommon
     }
 
     /**
+     * Send a work request to the server.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws Exception
+     */
+    private function sendWorkRequest($server)
+    {
+        // Prepare and send the work request
+        $response = (new Client())->request('POST', 'http://' . $server . '/work', [
+            'synchronous' => true,
+            'form_params' => [],
+        ]);
+
+        return $response->getBody()->getContents();
+    }
+
+    /**
      * Send a .cap file download request to the server.
      *
      * @param string $server Server to send the request to (only hostname and port)
@@ -134,26 +172,6 @@ class MarfilClient extends MarfilCommon
             sprintf('http://%s/download-part/%s/%s', $server, $hash, $partNumber),
             $partFilePath
         );
-    }
-
-    /**
-     * Send a work request to the server.
-     *
-     * @param string $server Server to send the request to (only hostname and port)
-     *
-     * @return \Illuminate\Http\JsonResponse
-     *
-     * @throws Exception
-     */
-    private function sendWorkRequest($server)
-    {
-        // Prepare and send the work request
-        $response = (new Client())->request('POST', 'http://' . $server . '/work', [
-            'synchronous' => true,
-            'form_params' => []
-        ]);
-
-        return $response->getBody()->getContents();
     }
 
     /**
