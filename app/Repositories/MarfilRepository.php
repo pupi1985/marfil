@@ -97,7 +97,7 @@ class MarfilRepository
         return DB::table('work_units as wu')
             ->join('crack_requests as cr', 'wu.crack_request_id', '=', 'cr.id')
             ->join('dictionaries as d', 'wu.dictionary_id', '=', 'd.id')
-            ->orderBy('cr.created_at', 'desc')
+            ->orderBy('cr.created_at')
             ->orderBy('wu.assigned_at')
             ->orderBy('wu.part')
             ->take(1)
