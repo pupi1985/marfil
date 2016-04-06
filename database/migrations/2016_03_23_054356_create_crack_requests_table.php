@@ -16,8 +16,10 @@ class CreateCrackRequestsTable extends Migration
             $table->increments('id');
             $table->macAddress('bssid');
             $table->text('password')->nullable();
+            $table->boolean('finished');
             $table->datetime('created_at');
 
+            $table->index('finished');
             $table->index('created_at');
         });
     }

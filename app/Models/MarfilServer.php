@@ -109,16 +109,26 @@ class MarfilServer extends MarfilCommon
      */
     public function processResult($workUnitId, $pass)
     {
+        $workUnit = $this->repo->getWorkUnit($workUnitId);
+
         if (is_null($pass)) {
             $this->repo->deleteWorkUnit($workUnitId);
 
+            $workFinished = !$this->repo->crackRequestHasWorkUnits($workUnit->crack_request_id);
+
+            if ($workFinished) {
+                $this->repo->updateCrackRequest($workUnit->crack_request_id, ['finished' => true,]);
+            }
+
             info(sprintf('Work unit id %s has been processed.', $workUnitId));
         } else {
-            $workUnit = $this->repo->getWorkUnit($workUnitId);
             $crackRequest = $this->repo->getCrackRequest($workUnit->crack_request_id);
 
             $this->repo->deleteAllWorkUnitsForCrackRequestId($crackRequest->id);
-            $this->repo->updateCrackRequest($crackRequest->id, ['password' => $pass]);
+            $this->repo->updateCrackRequest($crackRequest->id, [
+                'password' => $pass,
+                'finished' => true,
+            ]);
 
             info(sprintf('Password found for bssid %s: [%s]', $crackRequest->bssid, $pass));
         }

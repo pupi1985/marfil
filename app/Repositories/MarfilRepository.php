@@ -21,6 +21,7 @@ class MarfilRepository
         $id = DB::table('crack_requests')->insertGetId([
             'bssid' => $bssid,
             'password' => null,
+            'finished' => false,
             'created_at' => Carbon::createFromTimestamp(time()),
         ]);
 
@@ -153,6 +154,20 @@ class MarfilRepository
     public function getCrackRequest($crackRequestId)
     {
         return DB::table('crack_requests')->find($crackRequestId);
+    }
+
+    /**
+     * Check if a given crack request has any work unit left.
+     *
+     * @param int $crackRequestId Crack request id
+     *
+     * @return void
+     */
+    public function crackRequestHasWorkUnits($crackRequestId)
+    {
+        return DB::table('work_units')
+            ->where('crack_request_id', $crackRequestId)
+            ->exists();
     }
 
     /**
