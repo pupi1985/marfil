@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 try {
@@ -30,7 +32,7 @@ $app->withFacades();
 // Setup configuration parameters
 
 config([
-    "filesystems" => [
+    'filesystems' => [
         'default' => 'local',
         'disks' => [
             'local' => [
@@ -40,6 +42,11 @@ config([
         ],
     ],
 ]);
+
+// Add foreign key support
+if (DB::connection() instanceof \Illuminate\Database\SQLiteConnection) {
+    DB::statement(DB::raw('PRAGMA foreign_keys=1'));
+}
 
 /*
 |--------------------------------------------------------------------------

@@ -111,6 +111,11 @@ class MarfilServer extends MarfilCommon
     {
         $workUnit = $this->repo->getWorkUnit($workUnitId);
 
+        // The work unit has already been processed
+        if (is_null($workUnit)) {
+            return;
+        }
+
         if (is_null($pass)) {
             $this->repo->deleteWorkUnit($workUnitId);
 
