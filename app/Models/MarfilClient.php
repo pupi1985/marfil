@@ -75,22 +75,45 @@ class MarfilClient extends MarfilCommon
     }
 
     /**
-     * Send the server a work request.
+     * Perform work actions forever.
      *
      * @param string $server Server to send the request to (only hostname and port)
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return void
      *
      * @throws Exception
      */
     public function work($server)
+    {
+        $waitingSeconds = 60;
+        while (true) {
+            $result = $this->workAction($server);
+            if ($result !== MessageResults::WORK_NEEDED) {
+                $this->command->line(sprintf('Waiting for %s seconds before asking for more work...', $waitingSeconds));
+                sleep($waitingSeconds);
+            }
+        }
+    }
+
+    /**
+     * Send the server a work request.
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
+    public function workAction($server)
     {
         $responseContent = $this->sendWorkRequest($server);
 
         $responseObject = json_decode($responseContent);
         $this->handleError($responseObject);
 
-        if ($responseObject->result == MessageResults::WORK_NEEDED) {
+        $workActionResult = $responseObject->result;
+
+        if ($workActionResult == MessageResults::WORK_NEEDED) {
             $workUnitId = $responseObject->data->work_unit_id;
             $capFileId = $responseObject->data->crack_request_id;
             $hash = $responseObject->data->dictionary_hash;
@@ -117,6 +140,8 @@ class MarfilClient extends MarfilCommon
         }
 
         $this->command->info($responseObject->message);
+
+        return $workActionResult;
     }
 
     /**
