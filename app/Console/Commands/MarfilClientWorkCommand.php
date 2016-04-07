@@ -51,7 +51,7 @@ class MarfilClientWorkCommand extends Command
         try {
             $server = $this->argument('server');
 
-            $this->line('Starting to work...');
+            $this->line('Starting to work.');
 
             $this->client->work($server);
         } catch (Exception $e) {

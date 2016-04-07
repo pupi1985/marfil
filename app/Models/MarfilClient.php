@@ -106,6 +106,7 @@ class MarfilClient extends MarfilCommon
      */
     public function workAction($server)
     {
+        $this->command->line('Checking if work is needed...');
         $responseContent = $this->sendWorkRequest($server);
 
         $responseObject = json_decode($responseContent);
@@ -114,6 +115,8 @@ class MarfilClient extends MarfilCommon
         $workActionResult = $responseObject->result;
 
         if ($workActionResult == MessageResults::WORK_NEEDED) {
+            $this->command->line('Server confirmed work is needed.');
+
             $workUnitId = $responseObject->data->work_unit_id;
             $capFileId = $responseObject->data->crack_request_id;
             $hash = $responseObject->data->dictionary_hash;
@@ -134,7 +137,13 @@ class MarfilClient extends MarfilCommon
             }
 
             // Check if dictionary part file is present and download it if not
+
             if (!File::exists($partFilePath)) {
+                $this->command->line(sprintf(
+                    'Downloading dictionary part file %s...',
+                    File::basename(File::dirname($partFilePath)) . '/' . File::basename($partFilePath)
+                ));
+
                 File::makeDirectory($this->getDictionaryPartsPath($hash), 0755, false, true);
                 $this->sendPartFileDownloadRequest($server, $hash, $partNumber, $partFilePath);
             }
