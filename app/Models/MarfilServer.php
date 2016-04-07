@@ -48,7 +48,7 @@ class MarfilServer extends MarfilCommon
         $id = $this->repo->saveCrackRequest($mac);
 
         // Try to save the file
-        File::put($this->getCapFilepath($id), $fileContents);
+        File::put($this->getCapFilePath($id), $fileContents);
 
         // Add work units
         $dictionaries = $this->repo->getAllDictionaries();

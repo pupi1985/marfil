@@ -119,7 +119,7 @@ class MarfilClient extends MarfilCommon
             $hash = $responseObject->data->dictionary_hash;
             $partNumber = $responseObject->data->part_number;
             $mac = $responseObject->data->mac;
-            $capFilePath = $this->getCapFilepath($capFileId);
+            $capFilePath = $this->getCapFilePath($capFileId);
             $partFilePath = $this->getDictionaryPartPath($hash, $partNumber);
 
             // Download and save .cap file
@@ -320,7 +320,7 @@ class MarfilClient extends MarfilCommon
     {
         $this->command->line(sprintf('Compacting .cap file %s.', File::basename($capFilePath)));
 
-        $outputCapFilePath = $this->getCapFilepath(0, true);
+        $outputCapFilePath = $this->getCapFilePath(0, true);
 
         $process = new Process(sprintf('wpaclean %s %s', $outputCapFilePath, $capFilePath));
         $process->setTimeout(0);

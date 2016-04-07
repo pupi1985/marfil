@@ -61,7 +61,7 @@ class MarfilCommon
      *
      * @return string
      */
-    public function getCapFilepath($id, $temp = false)
+    public function getCapFilePath($id, $temp = false)
     {
         $pattern = $temp ? '/%s.temp.cap' : '/%s.cap';
 

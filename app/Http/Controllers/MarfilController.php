@@ -126,7 +126,7 @@ class MarfilController extends Controller
      */
     public function downloadCapRequest($id)
     {
-        $filePath = $this->server->getCapFilepath($id);
+        $filePath = $this->server->getCapFilePath($id);
 
         return response()->download($filePath);
     }
