@@ -123,7 +123,15 @@ class MarfilClient extends MarfilCommon
             $partFilePath = $this->getDictionaryPartPath($hash, $partNumber);
 
             // Download and save .cap file
-            $this->sendCapDownloadRequest($server, $capFileId, $capFilePath);
+
+            if (!File::exists($capFilePath)) {
+                $this->command->line(sprintf(
+                    'Downloading file %s...',
+                    File::basename($this->getCapFilePath($capFileId))
+                ));
+
+                $this->sendCapDownloadRequest($server, $capFileId, $capFilePath);
+            }
 
             // Check if dictionary part file is present and download it if not
             if (!File::exists($partFilePath)) {
