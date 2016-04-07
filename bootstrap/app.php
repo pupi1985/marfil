@@ -44,9 +44,20 @@ config([
 ]);
 
 // Add foreign key support
+
 if (DB::connection() instanceof \Illuminate\Database\SQLiteConnection) {
     DB::statement(DB::raw('PRAGMA foreign_keys=1'));
 }
+
+// Remove the aircrack-ng process when pressing CTRL-C in Linux
+
+declare(ticks = 1);
+pcntl_signal(SIGINT, function ($signal) {
+    switch ($signal) {
+        case SIGINT:
+            exit;
+    }
+});
 
 /*
 |--------------------------------------------------------------------------

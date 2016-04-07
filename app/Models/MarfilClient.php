@@ -246,7 +246,17 @@ class MarfilClient extends MarfilCommon
             $mac,
             File::basename(File::dirname($partFilePath)) . '/' . File::basename($partFilePath)
         ));
-        $process = new Process(sprintf('aircrack-ng -w %s -b %s -q %s', $partFilePath, $mac, $capFilePath));
+
+        // When using Linux a the process is wrapped in a sh -c call so what is killed is the wrapper process rather
+        // than the actual process. Running this through an exec removes the sh -c wrapper in Linux
+
+        $cmd = '';
+        if (Str::contains(Str::lower(PHP_OS), 'linux')) {
+            $cmd = 'exec ';
+        }
+        $cmd .= 'aircrack-ng -q -w %s -b %s %s';
+
+        $process = new Process(sprintf($cmd, $partFilePath, $mac, $capFilePath));
         $process->setTimeout(0);
         $process->setIdleTimeout(0);
         $process->run();
