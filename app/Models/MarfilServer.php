@@ -192,6 +192,9 @@ class MarfilServer extends MarfilCommon
         $fs->setLinesToSplitBy($this->getPartFileLength());
         $fs->setReadBufferSize(1048576);
         $fs->setEstimatedInMemoryLines(40000);
+        $fs->setNewPartCallback(function ($partNumber, $pathFile) {
+           $this->command->line('Splitting part ' . $partNumber);
+        });
         $fs->split();
 
         return $fs->getAmountOfFilesCreated();

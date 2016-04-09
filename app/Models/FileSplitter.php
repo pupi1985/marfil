@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 use SplFileObject;
 
 class FileSplitter
@@ -69,6 +68,13 @@ class FileSplitter
      * @var SplFileObject
      */
     private $currentPartFile;
+
+    /**
+     * Callback executed when generating a new part.
+     *
+     * @var callback
+     */
+    private $newPartCallback;
 
     /**
      * FileSplitter constructor.
@@ -166,6 +172,9 @@ class FileSplitter
         $this->pendingLinesInPart = $this->linesToSplitBy;
         $partFilePath = sprintf($this->partPattern, $this->amountOfFilesCreated);
         $this->currentPartFile = new SplFileObject($partFilePath, 'w');
+        if (!is_null($this->newPartCallback)) {
+            $this->newPartCallback->__invoke($this->amountOfFilesCreated, $partFilePath);
+        }
     }
 
     /**
@@ -238,6 +247,22 @@ class FileSplitter
     public function getAmountOfFilesCreated()
     {
         return $this->amountOfFilesCreated;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getNewPartCallback()
+    {
+        return $this->newPartCallback;
+    }
+
+    /**
+     * @param callable $newPartCallback Must receive a function with 2 arguments: a part number and a file path as string
+     */
+    public function setNewPartCallback(callable $newPartCallback)
+    {
+        $this->newPartCallback = $newPartCallback;
     }
 
 }
