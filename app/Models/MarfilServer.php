@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\FileHandling\FileCompressor;
+use App\Models\FileHandling\FileSplitter;
 use App\Repositories\MarfilRepository;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -142,7 +144,7 @@ class MarfilServer extends MarfilCommon
     /**
      * Recreates the dictionary's directory
      *
-     * @param $dictionary
+     * @param string $dictionary Hash of the dictionary
      *
      * @return void
      *
@@ -166,8 +168,10 @@ class MarfilServer extends MarfilCommon
 
         $filesCreated = $this->splitFile($dictionaryPath, $dictionaryPartsPath);
 
+        $this->compressFiles($filesCreated);
+
         try {
-            $this->repo->saveDictionary($dictionary, $hash, $filesCreated);
+            $this->repo->saveDictionary($dictionary, $hash, count($filesCreated));
         } catch (QueryException $e) {
             $this->command->error(
                 'Error while adding dictionary to the database. There might be dictionaries with same content.'
@@ -181,23 +185,44 @@ class MarfilServer extends MarfilCommon
     /**
      * Split a dictionary into parts.
      *
-     * @param $dictionaryPath Path to dictionary file
-     * @param $dictionaryPartsPath Path to dictionary's parts file
+     * @param string $dictionaryPath Path to dictionary file
+     * @param string $dictionaryPartsPath Path to dictionary's parts file
      *
-     * @return string Amount of files created
+     * @return array Contains all paths of all parts created
      */
     private function splitFile($dictionaryPath, $dictionaryPartsPath)
     {
+        $allPartPaths = [];
         $fs = new FileSplitter($dictionaryPath, $dictionaryPartsPath . '/%s.txt');
         $fs->setLinesToSplitBy($this->getPartFileLength());
-        $fs->setReadBufferSize(1048576);
+        $fs->setReadBufferSize(1024 * 1024 * 8); // 8 MB
         $fs->setEstimatedInMemoryLines(40000);
-        $fs->setNewPartCallback(function ($partNumber, $pathFile) {
-           $this->command->line('Splitting part ' . $partNumber);
+        $fs->setNewPartCallback(function ($partNumber, $partFilePath) use (&$allPartPaths) {
+            $this->command->line(sprintf('Splitting part %s.', $partNumber));
+            $allPartPaths[$partNumber] = $partFilePath;
         });
         $fs->split();
 
-        return $fs->getAmountOfFilesCreated();
+        return $allPartPaths;
+    }
+
+    /**
+     * Compress all files passed in the paths parameters
+     *
+     * @param array $allPartPaths Array of pa
+     *
+     * @throws Exception
+     */
+    private function compressFiles($allPartPaths)
+    {
+        $fc = new FileCompressor();
+        $fc->setReadBufferSize(1024 * 1024); // 1 MB
+        foreach ($allPartPaths as $index => $filePath) {
+            $this->command->line(sprintf('Compressing part %s.', $index));
+            $fc->setInputFilePath($filePath);
+            $fc->setOutputFilePath($this->getCompressedFilePath($filePath));
+            $fc->compress();
+        }
     }
 
 }

@@ -117,12 +117,35 @@ class MarfilCommon
      *
      * @param string $hash SHA1 hash of the dictionary
      * @param int $partNumber Part number of the dictionary
+     * @param bool $compressed Determines if the path should be for the compressed file version
      *
      * @return string
      */
-    public function getDictionaryPartPath($hash, $partNumber)
+    public function getDictionaryPartPath($hash, $partNumber, $compressed = false)
     {
-        return $this->getDictionaryPartsPath($hash) . '/' . $partNumber . '.txt';
+        $dictionaryPartPath = $this->getDictionaryPartsPath($hash) . '/' . $partNumber . '.txt';
+
+        if ($compressed) {
+            $dictionaryPartPath = $this->getCompressedFilePath($dictionaryPartPath);
+        }
+
+        return $dictionaryPartPath;
+    }
+
+    /**
+     * Return a file path name for gzipped files
+     *
+     * @param string $filePath Original file name
+     *
+     * @return string
+     */
+    public function getCompressedFilePath($filePath)
+    {
+        if (!Str::endsWith($filePath, '.gz')) {
+            $filePath .= '.gz';
+        }
+
+        return $filePath;
     }
 
     /**

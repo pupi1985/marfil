@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\FileHandling\FileCompressor;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
@@ -136,17 +137,7 @@ class MarfilClient extends MarfilCommon
                 $this->sendCapDownloadRequest($server, $capFileId, $capFilePath);
             }
 
-            // Check if dictionary part file is present and download it if not
-
-            if (!File::exists($partFilePath)) {
-                $this->command->line(sprintf(
-                    'Downloading dictionary part file %s...',
-                    File::basename(File::dirname($partFilePath)) . '/' . File::basename($partFilePath)
-                ));
-
-                File::makeDirectory($this->getDictionaryPartsPath($hash), 0755, false, true);
-                $this->sendPartFileDownloadRequest($server, $hash, $partNumber, $partFilePath);
-            }
+            $this->prepareDictionaryPartFile($server, $partFilePath, $hash, $partNumber);
 
             $pass = $this->startCrackProcess($partFilePath, $capFilePath, $mac);
 
@@ -378,5 +369,41 @@ class MarfilClient extends MarfilCommon
         ]);
 
         return $response->getBody()->getContents();
+    }
+
+    /**
+     * Check if dictionary part file is present and download and decompress it if not
+     *
+     * @param string $server Server to send the request to (only hostname and port)
+     * @param string $partFilePath Path to the dictionary part file
+     * @param string $dictionaryHash Hash of the dictionary
+     * @param int $partNumber Dictionary part number
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    private function prepareDictionaryPartFile($server, $partFilePath, $dictionaryHash, $partNumber)
+    {
+        if (!File::exists($partFilePath)) {
+            $compressedPartFilePath = $this->getCompressedFilePath($partFilePath);
+            $directoryAndCompressedPartFilePath = File::basename(File::dirname($partFilePath)) . '/' . File::basename($compressedPartFilePath);
+
+            $this->command->line(sprintf(
+                'Downloading dictionary part file %s...', $directoryAndCompressedPartFilePath
+            ));
+
+            File::makeDirectory($this->getDictionaryPartsPath($dictionaryHash), 0755, false, true);
+
+            $this->sendPartFileDownloadRequest($server, $dictionaryHash, $partNumber, $compressedPartFilePath);
+
+            $this->command->line(sprintf(
+                'Decompressing dictionary part file %s...', $directoryAndCompressedPartFilePath
+            ));
+
+            (new FileCompressor($compressedPartFilePath, $partFilePath))->decompress();
+
+            File::delete($compressedPartFilePath);
+        }
     }
 }

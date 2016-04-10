@@ -141,7 +141,7 @@ class MarfilController extends Controller
      */
     public function downloadPartRequest($hash, $partNumber)
     {
-        $filePath = $this->server->getDictionaryPartPath($hash, $partNumber);
+        $filePath = $this->server->getDictionaryPartPath($hash, $partNumber, true);
 
         return response()->download($filePath);
     }
