@@ -31,6 +31,16 @@ class MarfilController extends Controller
     {
         $crackRequests = $this->server->getAllCrackRequests();
 
+        foreach ($crackRequests as $crackRequest) {
+            if (empty($crackRequest->password)) {
+                if ($crackRequest->pending_parts == 0) {
+                    $crackRequest->rowClass = 'danger';
+                }
+            } else {
+                $crackRequest->rowClass = 'success';
+            }
+        }
+
         return view('crack-requests', ['crackRequests' => $crackRequests]);
     }
 
