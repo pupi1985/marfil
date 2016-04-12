@@ -222,4 +222,18 @@ class MarfilRepository
                 DB::raw('max(wu.assigned_at) as latest_work_assigned_at'),
             ]);
     }
+
+    /**
+     * Delete a crack request from the given id.
+     *
+     * @param int $id
+     *
+     * @return void
+     */
+    public function deleteCrackRequest($id)
+    {
+        DB::table('crack_requests')
+            ->where('id', $id)
+            ->delete();
+    }
 }

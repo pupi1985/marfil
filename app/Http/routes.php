@@ -19,3 +19,5 @@ $app->get('/download-cap/{id}', 'MarfilController@downloadCapRequest');
 $app->get('/download-part/{hash}/{id}', 'MarfilController@downloadPartRequest');
 
 $app->get('/', 'MarfilController@showCrackRequestsInformation');
+
+$app->delete('/crack-request/{id}', 'MarfilController@deleteCrackRequest');

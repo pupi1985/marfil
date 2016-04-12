@@ -35,6 +35,20 @@ class MarfilController extends Controller
     }
 
     /**
+     * Delete a crack request from the given id.
+     *
+     * @param int $id
+     *
+     * @return Response
+     */
+    public function deleteCrackRequest($id)
+    {
+        $this->server->deleteCrackRequest($id);
+
+        return redirect('/');
+    }
+
+    /**
      * Process a crack request.
      *
      * The crack request is added to the database and the .cap file saved.

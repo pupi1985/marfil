@@ -7,6 +7,7 @@
     <title>Bootstrap 101 Template</title>
 
     <link href="{{ url('master.css') }}" rel="stylesheet">
+    <script src="{{ url('master.js') }}"></script>
     <!-- Bootstrap -->
     <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 </head>
