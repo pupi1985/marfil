@@ -1,0 +1,7 @@
+.table > tbody > tr > td.align-middle {
+    vertical-align: middle;
+}
+
+.password {
+    font-family: monospace;
+}

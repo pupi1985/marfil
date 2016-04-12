@@ -142,6 +142,16 @@ class MarfilServer extends MarfilCommon
     }
 
     /**
+     * Return all crack requests with summarized work units information.
+     *
+     * @return Response
+     */
+    public function getAllCrackRequests()
+    {
+        return $this->repo->getAllCrackRequests();
+    }
+
+    /**
      * Recreates the dictionary's directory
      *
      * @param string $dictionary Hash of the dictionary

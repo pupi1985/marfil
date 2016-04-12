@@ -99,6 +99,7 @@ class MarfilRepository
             ->join('crack_requests as cr', 'wu.crack_request_id', '=', 'cr.id')
             ->join('dictionaries as d', 'wu.dictionary_id', '=', 'd.id')
             ->orderBy('cr.created_at')
+            ->orderBy('cr.id')
             ->orderBy('wu.assigned_at')
             ->orderBy('wu.part')
             ->take(1)
@@ -197,5 +198,28 @@ class MarfilRepository
         DB::table('crack_requests')
             ->where('id', $id)
             ->update($fields);
+    }
+
+    /**
+     * Return all crack requests with summarized work units information.
+     *
+     * @return array
+     */
+    public function getAllCrackRequests()
+    {
+        return DB::table('crack_requests as cr')
+            ->leftJoin('work_units as wu', 'wu.crack_request_id', '=', 'cr.id')
+            ->groupBy('cr.id', 'cr.bssid', 'cr.password', 'cr.finished', 'cr.created_at')
+            ->orderBy('cr.created_at', 'desc')
+            ->orderBy('cr.id', 'desc')
+            ->get([
+                'cr.id',
+                'cr.bssid',
+                'cr.password',
+                'cr.finished',
+                'cr.created_at',
+                DB::raw('count(wu.id) as pending_parts'),
+                DB::raw('max(wu.assigned_at) as latest_work_assigned_at'),
+            ]);
     }
 }

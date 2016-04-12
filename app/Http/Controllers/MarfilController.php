@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\MarfilServer;
 use App\Models\MessageResults;
 use Exception;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class MarfilController extends Controller
 {
@@ -20,6 +20,18 @@ class MarfilController extends Controller
     public function __construct(MarfilServer $server)
     {
         $this->server = $server;
+    }
+
+    /**
+     * Display a list of all crack requests with summarized work units information.
+     *
+     * @return Response
+     */
+    public function showCrackRequestsInformation()
+    {
+        $crackRequests = $this->server->getAllCrackRequests();
+
+        return view('crack-requests', ['crackRequests' => $crackRequests]);
     }
 
     /**
