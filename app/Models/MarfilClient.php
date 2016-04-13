@@ -56,6 +56,9 @@ class MarfilClient extends MarfilCommon
         // Prepare and send the crack request
         $response = (new Client())->request('POST', 'http://' . $server . '/crack', [
             'synchronous' => true,
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
             'multipart' => [
                 [
                     'name' => 'bssid',
@@ -165,6 +168,9 @@ class MarfilClient extends MarfilCommon
     {
         // Prepare and send the work request
         $response = (new Client())->request('POST', 'http://' . $server . '/work', [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
             'synchronous' => true,
             'form_params' => [],
         ]);
@@ -362,6 +368,9 @@ class MarfilClient extends MarfilCommon
         // Prepare and send the result request
         $response = (new Client())->request('POST', 'http://' . $server . '/result', [
             'synchronous' => true,
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
             'form_params' => [
                 'work_unit_id' => $workUnitId,
                 'pass' => $pass,
@@ -387,7 +396,8 @@ class MarfilClient extends MarfilCommon
     {
         if (!File::exists($partFilePath)) {
             $compressedPartFilePath = $this->getCompressedFilePath($partFilePath);
-            $directoryAndCompressedPartFilePath = File::basename(File::dirname($partFilePath)) . '/' . File::basename($compressedPartFilePath);
+            $directoryAndCompressedPartFilePath =
+                File::basename(File::dirname($partFilePath)) . '/' . File::basename($compressedPartFilePath);
 
             $this->command->line(sprintf(
                 'Downloading dictionary part file %s...', $directoryAndCompressedPartFilePath
