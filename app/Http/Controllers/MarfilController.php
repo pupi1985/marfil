@@ -6,6 +6,7 @@ use App\Models\MarfilServer;
 use App\Models\MessageResults;
 use Exception;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
 class MarfilController extends Controller
@@ -35,13 +36,15 @@ class MarfilController extends Controller
             if (empty($crackRequest->password)) {
                 if ($crackRequest->pending_parts == 0) {
                     $crackRequest->rowClass = 'danger';
+                } else {
+                    $crackRequest->rowClass = '';
                 }
             } else {
                 $crackRequest->rowClass = 'success';
             }
         }
 
-        return view('crack-requests', ['crackRequests' => $crackRequests]);
+        return view('crack-requests', ['crackRequests' => $crackRequests])->withErrors([]);
     }
 
     /**
@@ -59,16 +62,58 @@ class MarfilController extends Controller
     }
 
     /**
-     * Process a crack request.
-     *
-     * The crack request is added to the database and the .cap file saved.
+     * Process a crack request that comes from the console.
      *
      * @return \Illuminate\Http\JsonResponse;
      */
-    public function crackRequest()
+    public function createConsoleCrackRequest()
+    {
+        $result = $this->crackRequest();
+
+        return response()->json($result);
+    }
+
+    /**
+     * Process a crack request that comes from the web.
+     *
+     * @return \Illuminate\Http\JsonResponse;
+     */
+    public function createWebCrackRequest()
+    {
+        $rules = [
+            'bssid' => 'required|regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
+            'file' => 'required',
+        ];
+
+        $validator = Validator::make(Request::all(), $rules);
+
+        $operationResult = null;
+        $operationMessage = '';
+        $input = Request::only('bssid', 'file');
+
+        if ($validator->passes()) {
+            $result = $this->crackRequest();
+            $operationResult = $result['result'];
+            $operationMessage = $result['message'];
+            if ($operationResult == MessageResults::SUCCESS) {
+                $input = [];
+            }
+        }
+
+        $homeView = $this->showCrackRequestsInformation();
+
+        return $homeView
+            ->withErrors($validator)
+            ->with($input)
+            ->with('operationResult', $operationResult)
+            ->with('operationMessage', $operationMessage);
+    }
+
+    private function crackRequest()
     {
         $bssid = Request::get('bssid');
         $mac = $this->server->normalizeMacAddress($bssid);
+
         $fileHash = Request::get('file_hash');
 
         try {
@@ -83,7 +128,7 @@ class MarfilController extends Controller
 
             $result = [
                 'result' => MessageResults::SUCCESS,
-                'message' => 'File saved successfully!',
+                'message' => 'Crack request has been created successfully',
             ];
         } catch (Exception $e) {
             $result = [
@@ -92,7 +137,7 @@ class MarfilController extends Controller
             ];
         }
 
-        return response()->json($result);
+        return $result;
     }
 
     /**

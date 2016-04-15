@@ -30,12 +30,17 @@ class MarfilClient extends MarfilCommon
      */
     public function crack($server, $capFilePath, $mac)
     {
-        $capFilePath = $this->compactCapFile($capFilePath, $mac);
+        $this->command->line(sprintf('Compacting .cap file %s.', File::basename($capFilePath)));
+
+        $mac = $this->normalizeMacAddress($mac);
+
+        $outputCapFilePath = $this->getCapFilePath(0, true);
+        $this->compactCapFile($capFilePath, $outputCapFilePath, $mac);
 
         $responseContent = $this->sendCrackRequest($server, $capFilePath, $mac);
 
         // Delete sent file
-        File::delete($capFilePath);
+        File::delete($outputCapFilePath);
 
         $responseObject = json_decode($responseContent);
         $this->handleError($responseObject);
@@ -318,40 +323,6 @@ class MarfilClient extends MarfilCommon
             'synchronous' => true,
             'sink' => $path,
         ]);
-    }
-
-    /**
-     * Removes unnecessary information from .cap file, leaving the handshake.
-     *
-     * @param string $capFilePath Path to the .cap file
-     * @param string $mac Bssid to check if it is contained in the .cap file
-     *
-     * @return string
-     *
-     * @throws Exception
-     */
-    private function compactCapFile($capFilePath, $mac)
-    {
-        $this->command->line(sprintf('Compacting .cap file %s.', File::basename($capFilePath)));
-
-        $outputCapFilePath = $this->getCapFilePath(0, true);
-
-        $process = new Process(sprintf('wpaclean %s %s', $outputCapFilePath, $capFilePath));
-        $process->setTimeout(0);
-        $process->setIdleTimeout(0);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
-
-        $output = $process->getOutput();
-
-        if (!Str::contains($output, $mac)) {
-            throw new Exception(sprintf('The .cap file might not contain a handshake for mac %s.', $mac));
-        }
-
-        return $outputCapFilePath;
     }
 
     /**

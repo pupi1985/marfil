@@ -11,13 +11,18 @@
 |
 */
 
-$app->post('/crack', 'MarfilController@crackRequest');
+// For the console application
+
+$app->post('/crack', 'MarfilController@createConsoleCrackRequest');
 $app->post('/work', 'MarfilController@workRequest');
 $app->post('/result', 'MarfilController@resultRequest');
 
 $app->get('/download-cap/{id}', 'MarfilController@downloadCapRequest');
 $app->get('/download-part/{hash}/{id}', 'MarfilController@downloadPartRequest');
 
+// For the web interface
+
 $app->get('/', 'MarfilController@showCrackRequestsInformation');
+$app->post('/', 'MarfilController@createWebCrackRequest');
 
 $app->delete('/crack-request/{id}', 'MarfilController@deleteCrackRequest');

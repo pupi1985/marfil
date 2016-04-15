@@ -41,16 +41,18 @@ class MarfilServer extends MarfilCommon
      */
     public function addCrackRequest($file, $fileHash, $mac)
     {
-        $fileContents = File::get($file);
-
-        if (sha1($fileContents) !== $fileHash) {
+        if (!is_null($fileHash) && sha1_file($file) !== $fileHash) {
             throw new Exception('Hash received does not match file hash');
         }
 
+        $outputCapFilePath = $this->getCapFilePath(0, true);
+        $this->compactCapFile($file, $outputCapFilePath, $mac);
+
+        File::delete($file);
+
         $id = $this->repo->saveCrackRequest($mac);
 
-        // Try to save the file
-        File::put($this->getCapFilePath($id), $fileContents);
+        File::move($outputCapFilePath, $this->getCapFilePath($id));
 
         // Add work units
         $dictionaries = $this->repo->getAllDictionaries();

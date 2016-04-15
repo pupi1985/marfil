@@ -3,15 +3,17 @@
 @section('content')
     <div class="container">
         <div class="page-header">
-            <h1>Crack requests</h1>
+            <h1><a href="{{ url('/') }}">Crack requests</a></h1>
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-xs-12">
                 @if (empty($crackRequests))
-                    There are no crack requests.
+                    <div class="alert alert-info">
+                        There are no crack requests.
+                    </div>
                 @else
-                    <table class="table table-striped">
+                    <table class="table table-striped table-condensed">
                         <thead>
                         <tr>
                             <th class="text-right">ID</th>
@@ -42,7 +44,7 @@
                                           class="form-inline">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <div class="form-group">
-                                            <button type="submit" class="btn btn-danger"
+                                            <button type="submit" class="btn btn-sm btn-danger"
                                                     onclick="return show_confirm();">
                                                 Delete
                                             </button>
@@ -53,95 +55,81 @@
                         @endforeach
                         </tbody>
                     </table>
-
-                    <form class="form-inline">
-                        <div class="checkbox">
-                            <label class="checkbox-inline">
-                                <input type="checkbox" id="autorefreshCheckbox" onclick="return autorefreshChange();">
-                                Auto-refresh page
-
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="secondsInput"
-                                           oninput="return autorefreshChange();" size="5" value="60">
-                                </div>
-
-                                Next refresh in: <span id="secondsDisplay">60</span> seconds.
-                            </label>
-                            <p class="text-muted">
-                                <small>Input amount of seconds to auto-refresh. At least 60.</small>
-                            </p>
-                        </div>
-                    </form>
                 @endif
+                <form class="form-inline">
+                    <div class="checkbox">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" id="autorefreshCheckbox" onclick="return autorefreshChange();">
+                            Auto-refresh page
+
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="secondsInput"
+                                       oninput="return autorefreshChange();" size="5" value="60">
+                            </div>
+
+                            Next refresh in: <span id="secondsDisplay">60</span> seconds.
+                        </label>
+                        <p class="text-muted">
+                            <small>Input amount of seconds to auto-refresh. At least 60.</small>
+                        </p>
+                    </div>
+                </form>
             </div>
         </div>
         <div class="row">
-            <form>
-                <fieldset class="form-group">
-                    <label for="exampleInputEmail1">Email address</label>
-                    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-                    <small class="text-muted">We'll never share your email with anyone else.</small>
-                </fieldset>
-                <fieldset class="form-group">
-                    <label for="exampleInputPassword1">Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                </fieldset>
-                <fieldset class="form-group">
-                    <label for="exampleSelect1">Example select</label>
-                    <select class="form-control" id="exampleSelect1">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                    </select>
-                </fieldset>
-                <fieldset class="form-group">
-                    <label for="exampleSelect2">Example multiple select</label>
-                    <select multiple class="form-control" id="exampleSelect2">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                    </select>
-                </fieldset>
-                <fieldset class="form-group">
-                    <label for="exampleTextarea">Example textarea</label>
-                    <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
-                </fieldset>
-                <fieldset class="form-group">
-                    <label for="exampleInputFile">File input</label>
-                    <input type="file" class="form-control-file" id="exampleInputFile">
-                    <small class="text-muted">This is some placeholder block-level help text for the above input. It's a
-                        bit lighter and easily wraps to a new line.
-                    </small>
-                </fieldset>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
-                        Option one is this and that&mdash;be sure to include why it's great
-                    </label>
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Add crack request</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form action="{{ url('/') }}" method="POST" enctype="multipart/form-data">
+                                    <fieldset class="form-group{{ $errors->has('bssid') ? ' has-error' : '' }}">
+                                        <label for="bssid">BSSID</label>
+                                        <input type="text" class="form-control" id="bssid" name="bssid"
+                                               {{ isset($bssid) && !empty($bssid) ? 'value=' . $bssid : '' }}
+                                               placeholder="01:23:45:67:89:AB">
+                                        <small class="text-muted">
+                                            The BSSID to crack. The .cap file must contain a handshake for this BSSID.
+                                        </small>
+                                        @if ($errors->has('bssid'))
+                                            <span class="help-block">
+                                               <strong>{{ $errors->first('bssid') }}</strong>
+                                            </span>
+                                        @endif
+                                    </fieldset>
+                                    <fieldset class="form-group{{ $errors->has('file') ? ' has-error' : '' }}">
+                                        <label for="file">.cap file</label>
+                                        <input type="file" class="form-control-file" id="file" name="file">
+                                        <small class="text-muted">
+                                            The .cap file that contains the handshake. If the file is too large try
+                                            compacting
+                                            it with the `wpaclean` utility.
+                                        </small>
+                                        @if ($errors->has('file'))
+                                            <span class="help-block">
+                                               <strong>{{ $errors->first('file') }}</strong>
+                                            </span>
+                                        @endif
+                                    </fieldset>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                        Option two can be something else and selecting it will deselect option one
-                    </label>
-                </div>
-                <div class="radio disabled">
-                    <label>
-                        <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled>
-                        Option three is disabled
-                    </label>
-                </div>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox"> Check me out
-                    </label>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+                @if (isset($operationResult) && isset($operationMessage) && !is_null($operationResult))
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="alert {{ $operationResult == App\Models\MessageResults::SUCCESS ? 'alert-success' : 'alert-danger' }}">
+                                {{ $operationMessage }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 @endsection

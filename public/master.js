@@ -3,7 +3,7 @@ var myCounter = new Countdown({
         document.getElementById("secondsDisplay").textContent = sec;
     },
     onCounterEnd: function () {
-        location.reload(true);
+        window.location.href = window.location.href;
     }
 });
 

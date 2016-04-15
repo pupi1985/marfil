@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use Exception;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 class MarfilCommon
 {
@@ -22,6 +26,44 @@ class MarfilCommon
     public function setCommand($command)
     {
         $this->command = $command;
+    }
+
+    /**
+     * Remove unnecessary information from .cap file, leaving the handshake.
+     *
+     * @param string $capFilePath Path to the .cap file
+     * @param string $outputCapFilePath Path to the output .cap file
+     * @param string $mac Bssid to check if it is contained in the .cap file
+     *
+     * @return string
+     * @throws Exception If the output of the command is not the expected one
+     * @throws ProcessFailedException If there is an error executing the command
+     */
+    public function compactCapFile($capFilePath, $outputCapFilePath, $mac)
+    {
+        try {
+            $process = new Process(sprintf('wpaclean %s %s', $outputCapFilePath, $capFilePath));
+            $process->setTimeout(0);
+            $process->setIdleTimeout(0);
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+            $output = Str::upper($process->getOutput());
+
+            if (Str::contains($output, 'BAD FILE')) {
+                throw new Exception('The file is not a valid .cap file.');
+            }
+
+            if (!Str::contains($output, $mac)) {
+                throw new Exception(sprintf('The .cap file might not contain a handshake for mac %s.', $mac));
+            }
+        } catch (Exception $e) {
+            File::delete($outputCapFilePath);
+            throw $e;
+        }
     }
 
     /**
@@ -63,9 +105,9 @@ class MarfilCommon
      */
     public function getCapFilePath($id, $temp = false)
     {
-        $pattern = $temp ? '/%s.temp.cap' : '/%s.cap';
 
-        return sprintf($this->getCapFilesPath() . $pattern, $id);
+
+        return sprintf($this->getCapFilesPath() . '/%s.cap', $temp ? uniqid(rand()) : $id);
     }
 
     /**
