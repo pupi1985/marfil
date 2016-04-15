@@ -224,6 +224,18 @@ class MarfilRepository
     }
 
     /**
+     * Return all unfinished crack requests with summarized work units information.
+     *
+     * @return array
+     */
+    public function getAllUnfinishedCrackRequests()
+    {
+        return DB::table('crack_requests')
+            ->where('finished', 0)
+            ->get(['id']);
+    }
+
+    /**
      * Delete a crack request from the given id.
      *
      * @param int $id

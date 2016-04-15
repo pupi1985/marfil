@@ -54,13 +54,7 @@ class MarfilServer extends MarfilCommon
 
         File::move($outputCapFilePath, $this->getCapFilePath($id));
 
-        // Add work units
-        $dictionaries = $this->repo->getAllDictionaries();
-        foreach ($dictionaries as $dictionary) {
-            for ($partNumber = 1; $partNumber <= $dictionary->parts; $partNumber++) {
-                $this->repo->saveWorkUnit($dictionary->id, $id, $partNumber, null);
-            }
-        }
+        $this->addWorkUnitsForCrackRequestId($id);
     }
 
     /**
@@ -84,6 +78,13 @@ class MarfilServer extends MarfilCommon
         $dictionaries = File::files($dictionariesPath);
         foreach ($dictionaries as $dictionary) {
             $this->refreshDictionary(File::basename($dictionary));
+        }
+
+        // Regenerate all work units for unfinished crack requests
+        $crackRequests = $this->repo->getAllUnfinishedCrackRequests();
+        foreach ($crackRequests as $crackRequest) {
+            $this->repo->deleteAllWorkUnitsForCrackRequestId($crackRequest->id);
+            $this->addWorkUnitsForCrackRequestId($crackRequest->id);
         }
     }
 
@@ -110,6 +111,8 @@ class MarfilServer extends MarfilCommon
      *
      * @param int $workUnitId Work unit id for the server to mark as done
      * @param string $pass Password string, if found. Null, if not found
+     *
+     * @return void
      */
     public function processResult($workUnitId, $pass)
     {
@@ -235,6 +238,8 @@ class MarfilServer extends MarfilCommon
      *
      * @param array $allPartPaths Array of pa
      *
+     * @return void
+     *
      * @throws Exception
      */
     private function compressFiles($allPartPaths)
@@ -246,6 +251,24 @@ class MarfilServer extends MarfilCommon
             $fc->setInputFilePath($filePath);
             $fc->setOutputFilePath($this->getCompressedFilePath($filePath));
             $fc->compress();
+        }
+    }
+
+    /**
+     * Add all work units for the given crack request id.
+     *
+     * @param int $crackRequestId
+     *
+     * @return void
+     */
+    private function addWorkUnitsForCrackRequestId($crackRequestId)
+    {
+        $dictionaries = $this->repo->getAllDictionaries();
+
+        foreach ($dictionaries as $dictionary) {
+            for ($partNumber = 1; $partNumber <= $dictionary->parts; $partNumber++) {
+                $this->repo->saveWorkUnit($dictionary->id, $crackRequestId, $partNumber, null);
+            }
         }
     }
 
