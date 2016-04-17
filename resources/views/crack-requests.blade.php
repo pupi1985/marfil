@@ -22,7 +22,7 @@
                             <th>Finished</th>
                             <th class="text-right">Pending parts</th>
                             <th>Created at</th>
-                            <th>Latest work assigned at</th>
+                            <th>Latest work unit assigned at</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -56,22 +56,34 @@
                         </tbody>
                     </table>
                 @endif
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-9">
                 <form class="form-inline">
                     <div class="checkbox">
                         <label class="checkbox-inline">
                             <input type="checkbox" id="autorefreshCheckbox" onclick="return autorefreshChange();">
                             Auto-refresh page
-
                             <div class="form-group">
                                 <input type="text" class="form-control" id="secondsInput"
                                        oninput="return autorefreshChange();" size="5" value="60">
                             </div>
-
                             Next refresh in: <span id="secondsDisplay">60</span> seconds.
                         </label>
                         <p class="text-muted">
                             <small>Input amount of seconds to auto-refresh. At least 60.</small>
                         </p>
+                    </div>
+                </form>
+            </div>
+            <div class="col-xs-3">
+                <form action="{{ url('/crack-request/all') }}" method="POST" class="form-inline text-right">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-md btn-warning" onclick="return show_confirm();">
+                            Remove all crack requests
+                        </button>
                     </div>
                 </form>
             </div>

@@ -69,5 +69,5 @@ function Countdown(options) {
 }
 
 function show_confirm() {
-    return confirm("Are you sure you want to delete this crack request?");
+    return confirm("Are you sure you want to perform this operation?");
 }

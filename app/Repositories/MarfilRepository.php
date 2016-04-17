@@ -248,4 +248,17 @@ class MarfilRepository
             ->where('id', $id)
             ->delete();
     }
+
+    /**
+     * Delete all crack requests.
+     *
+     * @return void
+     */
+    public function deleteAllCrackRequests()
+    {
+        $table = DB::table('crack_requests');
+        $table->delete();
+        $table->truncate();
+        DB::table('work_units')->truncate();
+    }
 }

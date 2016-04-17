@@ -25,4 +25,5 @@ $app->get('/download-part/{hash}/{id}', 'MarfilController@downloadPartRequest');
 $app->get('/', 'MarfilController@showCrackRequestsInformation');
 $app->post('/', 'MarfilController@createWebCrackRequest');
 
+$app->delete('/crack-request/all', 'MarfilController@deleteAllCrackRequests');
 $app->delete('/crack-request/{id}', 'MarfilController@deleteCrackRequest');

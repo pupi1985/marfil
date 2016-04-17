@@ -169,6 +169,16 @@ class MarfilServer extends MarfilCommon
     }
 
     /**
+     * Delete all crack requests.
+     *
+     * @return void
+     */
+    public function deleteAllCrackRequests()
+    {
+        $this->repo->deleteAllCrackRequests();
+    }
+
+    /**
      * Recreates the dictionary's directory
      *
      * @param string $dictionary Hash of the dictionary

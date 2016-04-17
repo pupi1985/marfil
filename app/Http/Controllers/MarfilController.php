@@ -58,6 +58,18 @@ class MarfilController extends Controller
     }
 
     /**
+     * Delete all crack requests.
+     *
+     * @return Response
+     */
+    public function deleteAllCrackRequests()
+    {
+        $this->server->deleteAllCrackRequests();
+
+        return redirect('/');
+    }
+
+    /**
      * Process a crack request that comes from the console.
      *
      * @return \Illuminate\Http\JsonResponse;
